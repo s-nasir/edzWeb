@@ -82,8 +82,16 @@ connection_string = 'DRIVER={SQL Server};SERVER=YOUR_HOST;DATABASE=YOUR_DB;UID=Y
 - Error handling
 - Used Bootstrap for basic frontend
 - Tested app on Postman, MSSMS (Microsoft SQL Server Management Studio)
-- Postman Tests:
-![](/imgs/postman-coach-register.jpg)
+- Postman Test for Coach Registration:
+  ![](/imgs/postman-coach-register.jpg)
 
+- Postman Test for User Registration:
+  ![](/imgs/postman-user-register.jpg)
+
+- Postman Test for Login:
+  ![](/imgs/postman-login.jpg)
+
+- MSSMS Database Screenshot
+  ![](/imgs/sql-query-test.jpg)
 
 - Hosted a demo on Render (had to migrate to postgre sql, since azure is paid)
