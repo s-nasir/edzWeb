@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Coach Registration</title>
+
+    <link
+      rel="stylesheet"
+      href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
+    />
+  </head>
+  <body>
+    <div class="container mt-4">
+      <h1>Coach Registration</h1>
+      <form
+        action="/register/coach"
+        method="post"
+        class="needs-validation"
+        novalidate
+      >
+        <div class="form-group">
+          <label for="fullname">Full Name</label>
+          <input
+            type="text"
+            class="form-control"
+            id="fullname"
+            name="fullname"
+            required
+          />
+        </div>
+        <div class="form-group">
+          <label for="email">Email Address</label>
+          <input
+            type="email"
+            class="form-control"
+            id="email"
+            name="email"
+            required
+          />
+        </div>
+        <div class="form-group">
+          <label for="password">Password</label>
+          <input
+            type="password"
+            class="form-control"
+            id="password"
+            name="password"
+            required
+          />
+        </div>
+        <div class="form-group">
+          <label for="confirm_password">Confirm Password</label>
+          <input
+            type="password"
+            class="form-control"
+            id="confirm_password"
+            name="confirm_password"
+            required
+          />
+        </div>
+        <div class="form-group">
+          <label for="phone">Phone Number</label>
+          <input
+            type="number"
+            class="form-control"
+            id="phone"
+            name="phone"
+            required
+          />
+        </div>
+        <div class="form-group">
+          <label for="experience">Experience</label>
+          <textarea
+            class="form-control"
+            id="experience"
+            name="experience"
+            required
+          ></textarea>
+        </div>
+        <div class="form-group">
+          <label for="specialization">Specialization</label>
+          <select
+            class="form-control"
+            id="specialization"
+            name="specialization"
+            required
+          >
+            <option value="Life Coaching">Life Coaching</option>
+            <option value="Career Coaching">Career Coaching</option>
+            <option value="Health Coaching">Health Coaching</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="qualifications">Qualifications</label>
+          <textarea
+            class="form-control"
+            id="qualifications"
+            name="qualifications"
+            required
+          ></textarea>
+        </div>
+        <div class="form-group">
+          <label for="availability">Availability</label>
+          <select
+            class="form-control"
+            id="availability"
+            name="availability"
+            required
+          >
+            <option>Monday</option>
+            <option>Tuesday</option>
+            <option>Wednesday</option>
+            <option>Thursday</option>
+            <option>Friday</option>
+            <option>Saturday</option>
+            <option>Sunday</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="location">Location</label>
+          <input
+            type="text"
+            class="form-control"
+            id="location"
+            name="location"
+            required
+          />
+        </div>
+        <div class="form-group">
+          <label for="gender">Gender</label>
+          <select class="form-control" id="gender" name="gender" required>
+            <option value="Male">Male</option>
+            <option value="Female">Female</option>
+            <option value="Other">Other</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="languages">Languages Spoken</label>
+          <input
+            type="text"
+            class="form-control"
+            id="languages"
+            name="languages"
+            required
+          />
+        </div>
+        <div class="form-group">
+          <label for="preferredMethod">Preferred Coaching Method</label>
+          <select
+            class="form-control"
+            id="preferredMethod"
+            name="preferredMethod"
+            required
+          >
+            <option value="In-Person">In-Person</option>
+            <option value="Online">Online</option>
+            <option value="Phone">Phone</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="twitter">Twitter Link</label>
+          <input type="text" class="form-control" id="twitter" name="twitter" />
+        </div>
+        <div class="form-group">
+          <label for="facebook">Facebook Link</label>
+          <input
+            type="text"
+            class="form-control"
+            id="facebook"
+            name="facebook"
+          />
+        </div>
+        <div class="form-group form-check">
+          <input
+            type="checkbox"
+            class="form-check-input"
+            id="newsletter"
+            name="newsletter"
+          />
+          <label class="form-check-label" for="newsletter"
+            >Subscribe to Newsletter</label
+          >
+        </div>
+        <div class="form-group">
+          <label for="referral">Referral Source</label>
+          <select class="form-control" id="referral" name="referral">
+            <option value="Online Ad">Online Ad</option>
+            <option value="Friend">Friend</option>
+            <option value="Social Media">Social Media</option>
+            <option value="Others">Others</option>
+          </select>
+        </div>
+        <button type="submit" class="btn btn-primary">Register</button>
+      </form>
+    </div>
+  </body>
+</html>
