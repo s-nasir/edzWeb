@@ -5,7 +5,8 @@ import bcrypt
 app = Flask(__name__)
 app.config['TEMPLATES_AUTO_RELOAD'] = True
 
-# Configure the database connection string for SQL Server.  Change 
+# Configure the database connection string for SQL Server
+# Replace DRIVER={SQL Server};SERVER=YOUR_HOST;DATABASE=YOUR_DB;UID=YOUR_USER-ID;PWD=YOUR_PASSWORD
 connection_string = 'DRIVER={SQL Server};SERVER=MSI\\SQLEXPRESS;DATABASE=edz;UID=snasi;PWD=admin'
 
 def init_db():
