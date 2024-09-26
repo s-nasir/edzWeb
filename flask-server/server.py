@@ -129,6 +129,17 @@ def login():
     except Exception as e:
         return render_template('error.html', error_message=str(e)), 400
 
+
+@app.route('/test_db', methods=['GET'])
+def test_db():
+    try:
+        conn = pyodbc.connect(connection_string)
+        conn.close()
+        return jsonify({"message": "Database connection successful."}), 200
+    except pyodbc.Error as ex:
+        return jsonify({"error": str(ex)}), 500
+    
+    
 # Routes for displaying registration and login forms
 @app.route('/')
 def home():
