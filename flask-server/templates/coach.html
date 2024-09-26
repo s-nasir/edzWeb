@@ -19,7 +19,7 @@
       <h1>Coach Selection</h1>
 
       <!-- Form to select AI or Human Coach -->
-      <form id="coachForm" method="POST" action="/submit-coach-selection">
+      <form id="coachForm" method="POST" action="/coach">
         <div class="form-group">
           <label for="coachType">Choose your coach type:</label>
           <div class="form-check">
@@ -49,15 +49,24 @@
           </div>
         </div>
 
-        <!-- Dropdown for selecting a human coach -->
         <div id="humanCoachSelection" class="form-group hidden">
           <label for="humanCoachList">Select a human coach:</label>
           <select id="humanCoachList" class="form-control" name="humanCoach">
-            <option value="Coach1">Coach 1</option>
-            <option value="Coach2">Coach 2</option>
-            <option value="Coach3">Coach 3</option>
-            <option value="Coach4">Coach 4</option>
-            <option value="Coach5">Coach 5</option>
+            <option value="Ashok Arti - Life Coach">
+              Ashok Arti - Life Coach
+            </option>
+            <option value="Tahir Saeed - Career Coach">
+              Tahir Saeed - Career Coach
+            </option>
+            <option value="Clark Emersyn - Sports Coach">
+              Clark Emersyn - Sports Coach
+            </option>
+            <option value="Christa Gerd - Personal Coach">
+              Christa Gerd - Personal Coach
+            </option>
+            <option value="Sujata Sekhar - Educational Coach">
+              Sujata Sekhar - Educational Coach
+            </option>
           </select>
         </div>
 

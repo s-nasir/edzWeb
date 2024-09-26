@@ -1,9 +1,13 @@
-from flask import Flask, request, jsonify, render_template
+from flask import Flask, request, jsonify, render_template, session, redirect, url_for
 import pyodbc
 import bcrypt
 
+
 app = Flask(__name__)
 app.config['TEMPLATES_AUTO_RELOAD'] = True
+
+app.secret_key = 'JzOPlDd9LG'
+
 
 # Configure the database connection string for SQL Server
 # Replace DRIVER={SQL Server};SERVER=YOUR_HOST;DATABASE=YOUR_DB;UID=YOUR_USER-ID;PWD=YOUR_PASSWORD
@@ -52,8 +56,10 @@ def init_db():
             IF NOT EXISTS (SELECT * FROM sys.tables WHERE name = 'CoachSelection')
             CREATE TABLE CoachSelection (
                 ID INT IDENTITY(1,1) PRIMARY KEY,
+                EmailAddress VARCHAR(100) NOT NULL,
                 CoachType VARCHAR(50) NOT NULL,
-                HumanCoach VARCHAR(100) NULL
+                HumanCoach VARCHAR(100) NULL,
+                FOREIGN KEY (EmailAddress) REFERENCES Users(EmailAddress)
             );
         ''')
         conn.commit()
@@ -113,7 +119,7 @@ def register_user():
 
 @app.route('/login', methods=['POST'])
 def login():
-    # Endpoint for user login. Validates email and password against stored hashes. 
+    # Endpoint for user login. Validates email and password against stored hashes.
     email = request.form.get('email')
     password = request.form.get('password')
     if not email or not password:
@@ -129,30 +135,46 @@ def login():
             user = cursor.fetchone()
             user_data = coach or user
             if user_data and bcrypt.checkpw(password.encode('utf-8'), user_data[0].encode('utf-8')):
-                return render_template('coach.html'), 200
+                # Store the logged-in user's email in the session
+                session['email'] = email
+                return redirect(url_for('coach_selection_form'))
             else:
                 return render_template('error.html', error_message="Invalid credentials"), 401
     except Exception as e:
         return render_template('error.html', error_message=str(e)), 400
 
-@app.route('/coach-selection', methods=['POST'])
+@app.route('/coach', methods=['GET', 'POST'])
 def coach_selection():
-    # Get the coach selection data from the form
-    coach_type = request.form.get('coachType')
-    human_coach = request.form.get('humanCoach') if coach_type == 'Human' else None
+    # Ensure the user is logged in before allowing access to the coach selection form
+    if 'email' not in session:
+        return redirect(url_for('login_form'))  # Redirect to login if not logged in
 
-    try:
-        with pyodbc.connect(connection_string) as conn:
-            cursor = conn.cursor()
-            # Insert the coach selection into the database
-            cursor.execute("""
-                INSERT INTO CoachSelection (CoachType, HumanCoach) 
-                VALUES (?, ?)
-            """, (coach_type, human_coach))
-            conn.commit()
-        return render_template('confirmation.html', message='Coach selection submitted successfully.'), 201
-    except Exception as e:
-        return render_template('error.html', error_message=str(e)), 400
+    if request.method == 'POST':
+        # Get the coach selection data from the form
+        coach_type = request.form.get('coachType')
+        human_coach = request.form.get('humanCoach') if coach_type == 'Human' else None
+        email = session['email']  # Get the logged-in user's email from the session
+
+        try:
+            with pyodbc.connect(connection_string) as conn:
+                cursor = conn.cursor()
+                # Insert the coach selection along with the logged-in user's email into the database
+                cursor.execute("""
+                    INSERT INTO CoachSelection (EmailAddress, CoachType, HumanCoach) 
+                    VALUES (?, ?, ?)
+                """, (email, coach_type, human_coach))
+                conn.commit()
+            return render_template('confirmation.html', message='Coach selection submitted successfully.'), 201
+        except Exception as e:
+            return render_template('error.html', error_message=str(e)), 400
+
+    # Render the coach selection form if GET request
+    return render_template('coach.html')
+
+@app.route('/logout')
+def logout():
+    session.pop('email', None)  
+    return redirect(url_for('login_form'))
 
 @app.route('/test_db', methods=['GET'])
 def test_db():
