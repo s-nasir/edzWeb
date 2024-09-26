@@ -49,6 +49,12 @@ def init_db():
                 Occupation VARCHAR(20) NOT NULL,
                 Nationality VARCHAR(20) NOT NULL
             );
+            IF NOT EXISTS (SELECT * FROM sys.tables WHERE name = 'CoachSelection')
+            CREATE TABLE CoachSelection (
+                ID INT IDENTITY(1,1) PRIMARY KEY,
+                CoachType VARCHAR(50) NOT NULL,
+                HumanCoach VARCHAR(100) NULL
+            );
         ''')
         conn.commit()
 
@@ -123,12 +129,30 @@ def login():
             user = cursor.fetchone()
             user_data = coach or user
             if user_data and bcrypt.checkpw(password.encode('utf-8'), user_data[0].encode('utf-8')):
-                return render_template('confirmation.html', message="Login successful!"), 200
+                return render_template('coach.html'), 200
             else:
                 return render_template('error.html', error_message="Invalid credentials"), 401
     except Exception as e:
         return render_template('error.html', error_message=str(e)), 400
 
+@app.route('/coach-selection', methods=['POST'])
+def coach_selection():
+    # Get the coach selection data from the form
+    coach_type = request.form.get('coachType')
+    human_coach = request.form.get('humanCoach') if coach_type == 'Human' else None
+
+    try:
+        with pyodbc.connect(connection_string) as conn:
+            cursor = conn.cursor()
+            # Insert the coach selection into the database
+            cursor.execute("""
+                INSERT INTO CoachSelection (CoachType, HumanCoach) 
+                VALUES (?, ?)
+            """, (coach_type, human_coach))
+            conn.commit()
+        return render_template('confirmation.html', message='Coach selection submitted successfully.'), 201
+    except Exception as e:
+        return render_template('error.html', error_message=str(e)), 400
 
 @app.route('/test_db', methods=['GET'])
 def test_db():
@@ -156,6 +180,10 @@ def register_user_form():
 @app.route('/login')
 def login_form():
     return render_template('login.html')
+
+@app.route('/coach')
+def coach_selection_form():
+    return render_template('coach.html')
 
 if __name__ == '__main__':
     app.run(debug=True)

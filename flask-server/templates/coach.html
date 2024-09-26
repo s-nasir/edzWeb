@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Coach Selection</title>
+    <link
+      rel="stylesheet"
+      href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
+    />
+    <style>
+      .hidden {
+        display: none;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container mt-4">
+      <h1>Coach Selection</h1>
+
+      <!-- Form to select AI or Human Coach -->
+      <form id="coachForm" method="POST" action="/submit-coach-selection">
+        <div class="form-group">
+          <label for="coachType">Choose your coach type:</label>
+          <div class="form-check">
+            <input
+              class="form-check-input"
+              type="radio"
+              id="aiCoach"
+              name="coachType"
+              value="AI"
+              onclick="toggleCoachSelection()"
+              required
+            />
+            <label class="form-check-label" for="aiCoach">AI Coach</label>
+          </div>
+
+          <div class="form-check">
+            <input
+              class="form-check-input"
+              type="radio"
+              id="humanCoach"
+              name="coachType"
+              value="Human"
+              onclick="toggleCoachSelection()"
+              required
+            />
+            <label class="form-check-label" for="humanCoach">Human Coach</label>
+          </div>
+        </div>
+
+        <!-- Dropdown for selecting a human coach -->
+        <div id="humanCoachSelection" class="form-group hidden">
+          <label for="humanCoachList">Select a human coach:</label>
+          <select id="humanCoachList" class="form-control" name="humanCoach">
+            <option value="Coach1">Coach 1</option>
+            <option value="Coach2">Coach 2</option>
+            <option value="Coach3">Coach 3</option>
+            <option value="Coach4">Coach 4</option>
+            <option value="Coach5">Coach 5</option>
+          </select>
+        </div>
+
+        <button type="submit" class="btn btn-primary">Submit</button>
+      </form>
+    </div>
+
+    <script>
+      function toggleCoachSelection() {
+        const humanCoachSelection = document.getElementById(
+          "humanCoachSelection"
+        );
+        const humanCoachRadio = document.getElementById("humanCoach").checked;
+
+        if (humanCoachRadio) {
+          humanCoachSelection.classList.remove("hidden");
+        } else {
+          humanCoachSelection.classList.add("hidden");
+        }
+      }
+    </script>
+  </body>
+</html>
