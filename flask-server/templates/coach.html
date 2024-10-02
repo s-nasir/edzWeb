@@ -18,7 +18,6 @@
     <div class="container mt-4">
       <h1>Coach Selection</h1>
 
-      <!-- Form to select AI or Human Coach -->
       <form id="coachForm" method="POST" action="/coach">
         <div class="form-group">
           <label for="coachType">Choose your coach type:</label>
@@ -28,11 +27,13 @@
               type="radio"
               id="aiCoach"
               name="coachType"
-              value="AI"
+              value="Freddie"
               onclick="toggleCoachSelection()"
               required
             />
-            <label class="form-check-label" for="aiCoach">AI Coach</label>
+            <label class="form-check-label" for="aiCoach"
+              >Freddie (AI Coach)</label
+            >
           </div>
 
           <div class="form-check">

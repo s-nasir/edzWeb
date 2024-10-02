@@ -19,7 +19,7 @@ def init_db():
         cursor = conn.cursor()
         # SQL commands to create Coaches and Users tables
         cursor.execute('''
-            IF NOT EXISTS (SELECT * FROM sys.tables WHERE name = 'Coaches')
+              IF NOT EXISTS (SELECT * FROM sys.tables WHERE name = 'Coaches')
             CREATE TABLE Coaches (
                 EmailAddress VARCHAR(100) PRIMARY KEY,
                 FullName VARCHAR(100) NOT NULL,
@@ -137,7 +137,7 @@ def login():
             if user_data and bcrypt.checkpw(password.encode('utf-8'), user_data[0].encode('utf-8')):
                 # Store the logged-in user's email in the session
                 session['email'] = email
-                return redirect(url_for('coach_selection_form'))
+                return redirect(url_for('dash'))
             else:
                 return render_template('error.html', error_message="Invalid credentials"), 401
     except Exception as e:
@@ -150,31 +150,67 @@ def coach_selection():
         return redirect(url_for('login_form'))  # Redirect to login if not logged in
 
     if request.method == 'POST':
-        # Get the coach selection data from the form
+        # Handle coach selection, ensuring no duplicate entries and updating if needed
         coach_type = request.form.get('coachType')
         human_coach = request.form.get('humanCoach') if coach_type == 'Human' else None
-        email = session['email']  # Get the logged-in user's email from the session
+        email = session['email']
 
         try:
             with pyodbc.connect(connection_string) as conn:
                 cursor = conn.cursor()
-                # Insert the coach selection along with the logged-in user's email into the database
-                cursor.execute("""
-                    INSERT INTO CoachSelection (EmailAddress, CoachType, HumanCoach) 
-                    VALUES (?, ?, ?)
-                """, (email, coach_type, human_coach))
+                # Check if the user already made a selection and update instead of inserting a new row
+                cursor.execute("SELECT * FROM CoachSelection WHERE EmailAddress = ?", (email,))
+                existing_selection = cursor.fetchone()
+
+                if existing_selection:
+                    cursor.execute("""
+                        UPDATE CoachSelection SET CoachType = ?, HumanCoach = ? WHERE EmailAddress = ?
+                    """, (coach_type, human_coach, email))
+                else:
+                    cursor.execute("""
+                        INSERT INTO CoachSelection (EmailAddress, CoachType, HumanCoach) 
+                        VALUES (?, ?, ?)
+                    """, (email, coach_type, human_coach))
                 conn.commit()
-            return render_template('confirmation.html', message='Coach selection submitted successfully.'), 201
+            return render_template('confirmation_select.html', message='Coach selection submitted successfully.'), 201
         except Exception as e:
             return render_template('error.html', error_message=str(e)), 400
 
-    # Render the coach selection form if GET request
     return render_template('coach.html')
+@app.route('/checkcoach', methods=['GET'])
+def check_coach():
+    # Check the user's current coach selection
+    if 'email' not in session:
+        return redirect(url_for('login_form'))
 
+    email = session['email']
+    try:
+        with pyodbc.connect(connection_string) as conn:
+            cursor = conn.cursor()
+            cursor.execute("SELECT CoachType, HumanCoach FROM CoachSelection WHERE EmailAddress = ?", (email,))
+            coach_selection = cursor.fetchone()
+
+            if coach_selection:
+                coach_type, human_coach = coach_selection
+                if coach_type == 'Human':
+                    return render_template('coach_info.html', message=f'You selected {human_coach} as your Human Coach.')
+                else:
+                    return render_template('coach_info.html', message='You selected Freddie (AI Coach).')
+            else:
+                return render_template('coach_info.html', message='No coach selected.')
+    except Exception as e:
+        return render_template('error.html', error_message=str(e)), 400
+    
 @app.route('/logout')
 def logout():
     session.pop('email', None)  
-    return redirect(url_for('login_form'))
+    return redirect(url_for('/'))
+
+@app.route('/dash', methods=['GET'])
+def dash():
+    if 'email' not in session:
+        return redirect(url_for('login_form'))  
+    return render_template('dash.html')
 
 @app.route('/test_db', methods=['GET'])
 def test_db():
