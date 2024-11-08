@@ -11,7 +11,7 @@ app.secret_key = 'JzOPlDd9LG'
 
 # Configure the database connection string for SQL Server
 # Replace DRIVER={SQL Server};SERVER=YOUR_HOST;DATABASE=YOUR_DB;UID=YOUR_USER-ID;PWD=YOUR_PASSWORD
-connection_string = 'DRIVER={SQL Server};SERVER=MSI\\SQLEXPRESS;DATABASE=edz;UID=snasi;PWD=admin'
+connection_string = 'DRIVER={ODBC Driver 18 for SQL Server};SERVER=4.240.110.36,1433;DATABASE=edztest;UID=sa;PWD=dDPD28QPqf;TrustServerCertificate=yes;'
 
 def init_db():
     """ Initialize database tables for Coaches and Users if they do not already exist. """

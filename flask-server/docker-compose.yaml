@@ -1,0 +1,7 @@
+version: '3'
+services:
+  edzweb:
+    image: nginx:lastest
+    container_name: edz
+    volumes:
+      - /apps/edz/flask-app
