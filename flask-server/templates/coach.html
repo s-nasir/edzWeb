@@ -14,7 +14,7 @@
       }
     </style>
   </head>
-  <body>
+  <body style="background-color: #effbf1">
     <div class="container mt-4">
       <h1>Coach Selection</h1>
 
@@ -52,23 +52,28 @@
 
         <div id="humanCoachSelection" class="form-group hidden">
           <label for="humanCoachList">Select a human coach:</label>
-          <select id="humanCoachList" class="form-control" name="humanCoach">
-            <option value="Ashok Arti - Life Coach">
-              Ashok Arti - Life Coach
+          <select
+            id="humanCoachList"
+            class="form-control"
+            name="humanCoachEmail"
+            onchange="updateCoachName()"
+          >
+            {% for coach in coaches %}
+            <option
+              value="{{ coach.EmailAddress }}"
+              data-name="{{ coach.FullName }}"
+            >
+              {{ coach.FullName }} - {{ coach.Specialization }}
             </option>
-            <option value="Tahir Saeed - Career Coach">
-              Tahir Saeed - Career Coach
-            </option>
-            <option value="Clark Emersyn - Sports Coach">
-              Clark Emersyn - Sports Coach
-            </option>
-            <option value="Christa Gerd - Personal Coach">
-              Christa Gerd - Personal Coach
-            </option>
-            <option value="Sujata Sekhar - Educational Coach">
-              Sujata Sekhar - Educational Coach
-            </option>
+            {% endfor %}
           </select>
+          <!-- Hidden input to store the coach's name -->
+          <input
+            type="hidden"
+            id="humanCoachName"
+            name="humanCoachName"
+            value=""
+          />
         </div>
 
         <button type="submit" class="btn btn-primary">Submit</button>
@@ -84,10 +89,26 @@
 
         if (humanCoachRadio) {
           humanCoachSelection.classList.remove("hidden");
+          // Update coach name when showing the selection
+          updateCoachName();
         } else {
           humanCoachSelection.classList.add("hidden");
         }
       }
+
+      function updateCoachName() {
+        const coachSelect = document.getElementById("humanCoachList");
+        const selectedOption = coachSelect.options[coachSelect.selectedIndex];
+        const coachNameInput = document.getElementById("humanCoachName");
+        coachNameInput.value = selectedOption.getAttribute("data-name");
+      }
+
+      // Call updateCoachName on page load in case the selection is already visible
+      document.addEventListener("DOMContentLoaded", (event) => {
+        if (document.getElementById("humanCoach").checked) {
+          updateCoachName();
+        }
+      });
     </script>
   </body>
 </html>

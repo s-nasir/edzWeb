@@ -56,11 +56,13 @@ def init_db():
             IF NOT EXISTS (SELECT * FROM sys.tables WHERE name = 'CoachSelection')
             CREATE TABLE CoachSelection (
                 ID INT IDENTITY(1,1) PRIMARY KEY,
-                EmailAddress VARCHAR(100) NOT NULL,
+                EmailAddress VARCHAR(100) NOT NULL,  -- User's Email
                 CoachType VARCHAR(50) NOT NULL,
-                HumanCoach VARCHAR(100) NULL,
-                FOREIGN KEY (EmailAddress) REFERENCES Users(EmailAddress)
-            );
+                CoachEmailAddress VARCHAR(100) NULL,
+                CoachName VARCHAR(100) NULL,
+                FOREIGN KEY (EmailAddress) REFERENCES Users(EmailAddress),
+                FOREIGN KEY (CoachEmailAddress) REFERENCES Coaches(EmailAddress)
+);
         ''')
         conn.commit()
 
@@ -128,20 +130,49 @@ def login():
     try:
         with pyodbc.connect(connection_string) as conn:
             cursor = conn.cursor()
-            # Check email and password for both coach and user tables
+            # First, try to find the user in Coaches
             cursor.execute("SELECT PasswordHash FROM Coaches WHERE EmailAddress = ?", (email,))
             coach = cursor.fetchone()
-            cursor.execute("SELECT PasswordHash FROM Users WHERE EmailAddress = ?", (email,))
-            user = cursor.fetchone()
-            user_data = coach or user
+            if coach:
+                user_data = coach
+                user_type = 'coach'
+            else:
+                # Try to find the user in Users
+                cursor.execute("SELECT PasswordHash FROM Users WHERE EmailAddress = ?", (email,))
+                user = cursor.fetchone()
+                if user:
+                    user_data = user
+                    user_type = 'user'
+                else:
+                    user_data = None
+                    user_type = None
+
             if user_data and bcrypt.checkpw(password.encode('utf-8'), user_data[0].encode('utf-8')):
-                # Store the logged-in user's email in the session
+                # Store the logged-in user's email and user_type in the session
                 session['email'] = email
-                return redirect(url_for('dash'))
+                session['user_type'] = user_type
+                if user_type == 'coach':
+                    return redirect(url_for('coach_dashboard'))
+                elif user_type == 'user':
+                    return redirect(url_for('user_dashboard'))
+                else:
+                    return render_template('error.html', error_message="Invalid user type"), 401
             else:
                 return render_template('error.html', error_message="Invalid credentials"), 401
     except Exception as e:
         return render_template('error.html', error_message=str(e)), 400
+
+@app.route('/coach/dashboard', methods=['GET'])
+def coach_dashboard():
+    if 'email' not in session or session.get('user_type') != 'coach':
+        return redirect(url_for('login_form'))  
+    return render_template('coach_dashboard.html')
+
+@app.route('/user/dashboard', methods=['GET'])
+def user_dashboard():
+    if 'email' not in session or session.get('user_type') != 'user':
+        return redirect(url_for('login_form'))  
+    return render_template('user_dashboard.html')
 
 @app.route('/coach', methods=['GET', 'POST'])
 def coach_selection():
@@ -152,8 +183,13 @@ def coach_selection():
     if request.method == 'POST':
         # Handle coach selection, ensuring no duplicate entries and updating if needed
         coach_type = request.form.get('coachType')
-        human_coach = request.form.get('humanCoach') if coach_type == 'Human' else None
         email = session['email']
+        coach_email = None
+        coach_name = None
+
+        if coach_type == 'Human':
+            coach_email = request.form.get('humanCoachEmail')
+            coach_name = request.form.get('humanCoachName')
 
         try:
             with pyodbc.connect(connection_string) as conn:
@@ -164,17 +200,31 @@ def coach_selection():
 
                 if existing_selection:
                     cursor.execute("""
-                        UPDATE CoachSelection SET CoachType = ?, HumanCoach = ? WHERE EmailAddress = ?
-                    """, (coach_type, human_coach, email))
+                        UPDATE CoachSelection 
+                        SET CoachType = ?, CoachEmailAddress = ?, CoachName = ? 
+                        WHERE EmailAddress = ?
+                    """, (coach_type, coach_email, coach_name, email))
                 else:
                     cursor.execute("""
-                        INSERT INTO CoachSelection (EmailAddress, CoachType, HumanCoach) 
-                        VALUES (?, ?, ?)
-                    """, (email, coach_type, human_coach))
+                        INSERT INTO CoachSelection (EmailAddress, CoachType, CoachEmailAddress, CoachName) 
+                        VALUES (?, ?, ?, ?)
+                    """, (email, coach_type, coach_email, coach_name))
                 conn.commit()
             return render_template('confirmation_select.html', message='Coach selection submitted successfully.'), 201
         except Exception as e:
             return render_template('error.html', error_message=str(e)), 400
+
+    else:
+        # GET method: fetch the list of coaches from the 'Coaches' table
+        try:
+            with pyodbc.connect(connection_string) as conn:
+                cursor = conn.cursor()
+                cursor.execute("SELECT EmailAddress, FullName, Specialization FROM Coaches")
+                coaches = cursor.fetchall()
+            return render_template('coach.html', coaches=coaches)
+        except Exception as e:
+            return render_template('error.html', error_message=str(e)), 400
+
 
     return render_template('coach.html')
 @app.route('/checkcoach', methods=['GET'])
@@ -187,13 +237,20 @@ def check_coach():
     try:
         with pyodbc.connect(connection_string) as conn:
             cursor = conn.cursor()
-            cursor.execute("SELECT CoachType, HumanCoach FROM CoachSelection WHERE EmailAddress = ?", (email,))
+            cursor.execute("SELECT CoachType, CoachEmailAddress FROM CoachSelection WHERE EmailAddress = ?", (email,))
             coach_selection = cursor.fetchone()
 
             if coach_selection:
-                coach_type, human_coach = coach_selection
+                coach_type, coach_email = coach_selection
                 if coach_type == 'Human':
-                    return render_template('coach_info.html', message=f'You selected {human_coach} as your Human Coach.')
+                    # Fetch coach details
+                    cursor.execute("SELECT FullName, Specialization FROM Coaches WHERE EmailAddress = ?", (coach_email,))
+                    coach_info = cursor.fetchone()
+                    if coach_info:
+                        full_name, specialization = coach_info
+                        return render_template('coach_info.html', message=f'You selected {full_name} ({specialization}) as your Human Coach.')
+                    else:
+                        return render_template('coach_info.html', message='Selected coach not found.')
                 else:
                     return render_template('coach_info.html', message='You selected Freddie (AI Coach).')
             else:
@@ -203,14 +260,15 @@ def check_coach():
     
 @app.route('/logout')
 def logout():
-    session.pop('email', None)  
-    return redirect(url_for('/'))
+    session.pop('email', None)
+    session.pop('user_type', None)  
+    return redirect(url_for('home'))
 
 @app.route('/dash', methods=['GET'])
 def dash():
     if 'email' not in session:
         return redirect(url_for('login_form'))  
-    return render_template('dash.html')
+    return render_template('user_dashboard.html')
 
 @app.route('/test_db', methods=['GET'])
 def test_db():
@@ -242,6 +300,8 @@ def login_form():
 @app.route('/coach')
 def coach_selection_form():
     return render_template('coach.html')
+
+
 
 if __name__ == '__main__':
     app.run(debug=True)
