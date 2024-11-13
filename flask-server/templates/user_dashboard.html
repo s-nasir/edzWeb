@@ -49,109 +49,63 @@
         <a href="/checkcoach" class="btn btn-secondary">Check Current Coach</a>
       </div>
 
-      <!-- Book a Session Button -->
-      <div class="mt-4">
-        <button id="bookSessionBtn" class="btn btn-success">
-          Book a Session
-        </button>
-      </div>
-
-      <!-- Booking System Placeholder -->
-      <div id="bookingSystem">
-        <!-- Close Button -->
-        <button id="closeBookingBtn" aria-label="Close">&times;</button>
-
-        <!-- Booking System Content Wrapper -->
-        <div id="bookingContent">
-          <!-- Cal inline embed code begins -->
-          <div
-            style="width: 100%; height: 100%; overflow: scroll"
-            id="my-cal-inline"
-          ></div>
-          <script type="text/javascript">
-            (function (C, A, L) {
-              let p = function (a, ar) {
-                a.q.push(ar);
-              };
-              let d = C.document;
-              C.Cal =
-                C.Cal ||
-                function () {
-                  let cal = C.Cal;
-                  let ar = arguments;
-                  if (!cal.loaded) {
-                    cal.ns = {};
-                    cal.q = cal.q || [];
-                    d.head.appendChild(d.createElement("script")).src = A;
-                    cal.loaded = true;
-                  }
-                  if (ar[0] === L) {
-                    const api = function () {
-                      p(api, arguments);
-                    };
-                    const namespace = ar[1];
-                    api.q = api.q || [];
-                    if (typeof namespace === "string") {
-                      cal.ns[namespace] = cal.ns[namespace] || api;
-                      p(cal.ns[namespace], ar);
-                      p(cal, ["initNamespace", namespace]);
-                    } else p(cal, ar);
-                    return;
-                  }
-                  p(cal, ar);
-                };
-            })(
-              window,
-              "https://calonedz.webredirect.org/embed/embed.js",
-              "init"
-            );
-            Cal("init", "coaching", {
-              origin: "https://calonedz.webredirect.org",
-            });
-
-            Cal.ns.coaching("inline", {
-              elementOrSelector: "#my-cal-inline",
-              config: { layout: "month_view", theme: "light" },
-              calLink: "snasirh09-gmail.com/coaching",
-            });
-
-            Cal.ns.coaching("ui", {
-              theme: "light",
-              styles: { branding: { brandColor: "#397367" } },
-              hideEventTypeDetails: false,
-              layout: "month_view",
-            });
-          </script>
-          <!-- Cal inline embed code ends -->
-        </div>
-      </div>
-
       <div class="mt-4">
         <a href="/logout" class="btn btn-danger">Logout</a>
       </div>
     </div>
 
-    <!-- JavaScript to handle the button clicks -->
+    <!-- Cal floating-popup embed code begins -->
     <script type="text/javascript">
-      // Wait for the DOM to be fully loaded
-      document.addEventListener("DOMContentLoaded", function () {
-        // Show the booking system when "Book a Session" button is clicked
-        document
-          .getElementById("bookSessionBtn")
-          .addEventListener("click", function () {
-            document.getElementById("bookingSystem").style.display = "block";
-            this.style.display = "none"; // Hide the "Book a Session" button
-          });
+      (function (C, A, L) {
+        let p = function (a, ar) {
+          a.q.push(ar);
+        };
+        let d = C.document;
+        C.Cal =
+          C.Cal ||
+          function () {
+            let cal = C.Cal;
+            let ar = arguments;
+            if (!cal.loaded) {
+              cal.ns = {};
+              cal.q = cal.q || [];
+              d.head.appendChild(d.createElement("script")).src = A;
+              cal.loaded = true;
+            }
+            if (ar[0] === L) {
+              const api = function () {
+                p(api, arguments);
+              };
+              const namespace = ar[1];
+              api.q = api.q || [];
+              if (typeof namespace === "string") {
+                cal.ns[namespace] = cal.ns[namespace] || api;
+                p(cal.ns[namespace], ar);
+                p(cal, ["initNamespace", namespace]);
+              } else p(cal, ar);
+              return;
+            }
+            p(cal, ar);
+          };
+      })(window, "https://calonedz.webredirect.org/embed/embed.js", "init");
+      Cal("init", "coaching", { origin: "https://calonedz.webredirect.org" });
 
-        // Hide the booking system when the close button is clicked
-        document
-          .getElementById("closeBookingBtn")
-          .addEventListener("click", function () {
-            document.getElementById("bookingSystem").style.display = "none";
-            document.getElementById("bookSessionBtn").style.display =
-              "inline-block"; // Show the "Book a Session" button
-          });
+      Cal.ns.coaching("floatingButton", {
+        calLink: "snasirh09-gmail.com/coaching",
+        config: { layout: "month_view", theme: "light" },
+        buttonPosition: "bottom-left",
+        buttonText: "Book a Session",
+        hideButtonIcon: false,
+        buttonColor: "#004a27",
+        buttonTextColor: "#FFFFFF",
+      });
+      Cal.ns.coaching("ui", {
+        theme: "light",
+        styles: { branding: { brandColor: "#004a27" } },
+        hideEventTypeDetails: false,
+        layout: "month_view",
       });
     </script>
+    <!-- Cal floating-popup embed code ends -->
   </body>
 </html>
